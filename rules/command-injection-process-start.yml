@@ -1,0 +1,18 @@
+rules:
+  - id: dotnet-cmdi-process-start
+    patterns:
+      - pattern-either:
+          - pattern: Process.Start(...)
+          - pattern: $PROC.StartInfo.Arguments = ...
+          - pattern: $PROC.StartInfo.FileName = ...
+    message: >
+      Process execution that may include user-controlled input. If any
+      part of the command or its arguments comes from user input, this
+      is command injection. Avoid passing user input through a shell.
+      Use a fixed executable path with a strict argument allowlist.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-78
+      owasp: A03 Injection
+      stride: Elevation of Privilege
