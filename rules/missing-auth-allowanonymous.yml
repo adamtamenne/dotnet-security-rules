@@ -1,0 +1,20 @@
+rules:
+  - id: dotnet-auth-allowanonymous-sensitive
+    patterns:
+      - pattern: |
+          [AllowAnonymous]
+          public $RETURN $METHOD(...)
+          {
+            ...
+          }
+    message: >
+      Controller action marked [AllowAnonymous] allows unauthenticated
+      access. Verify this is intentional. Sensitive endpoints should
+      require [Authorize]. Review whether this action exposes data or
+      functionality that should be protected.
+    severity: WARNING
+    languages: [csharp]
+    metadata:
+      cwe: CWE-862
+      owasp: A01 Broken Access Control
+      stride: Spoofing, Elevation of Privilege
