@@ -1,0 +1,28 @@
+rules:
+  - id: dotnet-deser-typenamehandling
+    pattern-either:
+      - pattern: TypeNameHandling = TypeNameHandling.All
+      - pattern: TypeNameHandling = TypeNameHandling.Auto
+    message: >
+      TypeNameHandling allows untrusted input to specify which .NET type to
+      instantiate. Attacker can craft a payload for remote code execution.
+      Use TypeNameHandling.None or add a SerializationBinder to allowlist types.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-502
+      owasp: A08 Software and Data Integrity Failures
+      stride: Tampering, Elevation of Privilege
+
+  - id: dotnet-deser-binaryformatter
+    pattern: new BinaryFormatter()
+    message: >
+      BinaryFormatter is deprecated and inherently unsafe. It deserializes
+      arbitrary object graphs enabling remote code execution. No safe way
+      to use it. Use System.Text.Json instead.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-502
+      owasp: A08 Software and Data Integrity Failures
+      stride: Tampering, Elevation of Privilege
