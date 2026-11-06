@@ -1,0 +1,13 @@
+rules:
+  - id: dotnet-xss-html-raw
+    pattern: Html.Raw(...)
+    message: >
+      Html.Raw() bypasses Razor auto-encoding and renders input as raw HTML.
+      If the value comes from user input, this is XSS. Remove Html.Raw()
+      and let Razor encode the output.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-79
+      owasp: A03 Injection
+      stride: Tampering
