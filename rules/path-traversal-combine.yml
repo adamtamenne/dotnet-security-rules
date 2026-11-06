@@ -1,0 +1,14 @@
+rules:
+  - id: dotnet-path-traversal-combine
+    pattern: Path.Combine($BASE, $INPUT)
+    message: >
+      Path.Combine does not sanitize directory traversal sequences. If
+      the second argument comes from user input, an attacker can escape
+      the intended directory with ../ payloads. Validate input with
+      Path.GetFileName() to strip path components before combining.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-22
+      owasp: A01 Broken Access Control
+      stride: Information Disclosure, Tampering
