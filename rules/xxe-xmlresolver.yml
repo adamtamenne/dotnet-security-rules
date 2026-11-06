@@ -1,0 +1,15 @@
+rules:
+  - id: dotnet-xxe-xmlresolver
+    pattern-either:
+      - pattern: XmlResolver = new XmlUrlResolver()
+      - pattern: DtdProcessing = DtdProcessing.Parse
+    message: >
+      XML parser resolves external entities or processes DTDs. Attacker can
+      read local files, make SSRF requests, or cause denial of service.
+      Set XmlResolver = null and DtdProcessing = DtdProcessing.Prohibit.
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-611
+      owasp: A05 Security Misconfiguration
+      stride: Information Disclosure, Spoofing
