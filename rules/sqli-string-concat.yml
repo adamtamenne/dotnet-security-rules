@@ -1,0 +1,15 @@
+rules:
+  - id: dotnet-sqli-command
+    pattern-either:
+      - pattern: new SqliteCommand($CMD, ...)
+      - pattern: new SqlCommand($CMD, ...)
+    message: >
+      SQL command constructed with a variable. If it includes user input
+      via string concatenation or interpolation, this is SQL injection.
+      Use parameterized queries with cmd.Parameters.AddWithValue().
+    severity: ERROR
+    languages: [csharp]
+    metadata:
+      cwe: CWE-89
+      owasp: A03 Injection
+      stride: Tampering, Information Disclosure
