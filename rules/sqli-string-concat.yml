@@ -1,8 +1,11 @@
 rules:
   - id: dotnet-sqli-command
-    pattern-either:
-      - pattern: new SqliteCommand($CMD, ...)
-      - pattern: new SqlCommand($CMD, ...)
+    patterns:
+      - pattern-either:
+          - pattern: new SqliteCommand($CMD, ...)
+          - pattern: new SqlCommand($CMD, ...)
+      - pattern-not: new SqliteCommand("...", ...)
+      - pattern-not: new SqlCommand("...", ...)
     message: >
       SQL command constructed with a variable. If it includes user input
       via string concatenation or interpolation, this is SQL injection.
