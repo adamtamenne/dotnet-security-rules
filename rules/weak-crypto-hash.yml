@@ -1,0 +1,53 @@
+rules:
+  - id: dotnet-weak-crypto-md5
+    patterns:
+      - pattern-either:
+          - pattern: MD5.Create(...)
+          - pattern: MD5.HashData(...)
+          - pattern: new MD5CryptoServiceProvider(...)
+    message: >
+      MD5 is cryptographically broken. Collisions can be generated in
+      seconds. For integrity checks use SHA-256+. For password hashing
+      use bcrypt, scrypt, or Argon2 via a vetted library.
+    severity: WARNING
+    languages: [csharp]
+    metadata:
+      cwe: CWE-328
+      owasp: A02 Cryptographic Failures
+      stride: Tampering, Information Disclosure
+
+  - id: dotnet-weak-crypto-sha1
+    patterns:
+      - pattern-either:
+          - pattern: SHA1.Create(...)
+          - pattern: SHA1.HashData(...)
+          - pattern: new SHA1CryptoServiceProvider(...)
+          - pattern: new SHA1Managed(...)
+    message: >
+      SHA-1 is deprecated for security use. Collision attacks are
+      practical (SHAttered, 2017). Use SHA-256 or SHA-512 for
+      integrity. For password hashing use bcrypt, scrypt, or Argon2.
+    severity: WARNING
+    languages: [csharp]
+    metadata:
+      cwe: CWE-328
+      owasp: A02 Cryptographic Failures
+      stride: Tampering, Information Disclosure
+
+  - id: dotnet-weak-crypto-des
+    patterns:
+      - pattern-either:
+          - pattern: DES.Create(...)
+          - pattern: new DESCryptoServiceProvider(...)
+          - pattern: TripleDES.Create(...)
+          - pattern: new TripleDESCryptoServiceProvider(...)
+    message: >
+      DES and 3DES are deprecated. DES has a 56-bit key (brute-forcible
+      in hours) and 3DES is vulnerable to Sweet32 birthday attacks on
+      64-bit blocks. Use AES-256 via Aes.Create().
+    severity: WARNING
+    languages: [csharp]
+    metadata:
+      cwe: CWE-327
+      owasp: A02 Cryptographic Failures
+      stride: Information Disclosure
