@@ -14,6 +14,9 @@ Custom Semgrep rules for detecting common C#/.NET vulnerability patterns. Built 
 | path-traversal-combine.yml | dotnet-path-traversal-combine | Path.Combine with unsanitized input | CWE-22 | ERROR |
 | command-injection-process-start.yml | dotnet-cmdi-process-start | Process.Start / StartInfo with variables | CWE-78 | ERROR |
 | missing-auth-allowanonymous.yml | dotnet-auth-allowanonymous-sensitive | [AllowAnonymous] on sensitive endpoints | CWE-862 | WARNING |
+| weak-crypto-hash.yml | dotnet-weak-crypto-md5 | MD5.Create() / MD5CryptoServiceProvider | CWE-328 | WARNING |
+| weak-crypto-hash.yml | dotnet-weak-crypto-sha1 | SHA1.Create() / SHA1Managed | CWE-328 | WARNING |
+| weak-crypto-hash.yml | dotnet-weak-crypto-des | DES / TripleDES | CWE-327 | WARNING |
 
 ## Usage
 
