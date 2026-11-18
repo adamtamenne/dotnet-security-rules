@@ -33,12 +33,12 @@ semgrep --config rules/ --sarif -o results.sarif /path/to/project/
 Tested against [AspGoat](https://github.com/adamtamenne/AspGoat), an intentionally vulnerable ASP.NET Core application:
 
 ```
-8 findings across 2 files (HomeController.cs, DeserializationDemo.cs)
+7 findings across 2 files (HomeController.cs, DeserializationDemo.cs)
 
   SQLi:              SqliteCommand with concatenated query variable
   XXE:               XmlUrlResolver enabling external entity resolution
   Path Traversal:    Path.Combine(uploads, file.FileName) with unsanitized filename
-  Command Injection: Process.Start with user-controlled shell/args (2 findings)
+  Command Injection: Process.Start with user-controlled arguments (2 findings)
   Deserialization:   TypeNameHandling.All enabling arbitrary type instantiation
   Missing Auth:      [AllowAnonymous] on /internal/config exposing DB creds and JWT keys
 ```
@@ -47,4 +47,24 @@ Tested against [AspGoat](https://github.com/adamtamenne/AspGoat), an intentional
 
 **Razor templates (.cshtml):** Semgrep's `csharp` parser handles `.cs` files only. The `xss-html-raw` rule will not fire on `Html.Raw()` calls inside Razor views, which is where they most commonly appear in ASP.NET MVC applications. This is a Semgrep platform limitation, not a rule defect. The rule still catches `Html.Raw()` in code-behind or helper classes.
 
-**Broad matching:** Rules like `dotnet-path-traversal-combine` and `dotnet-cmdi-process-start` flag all usages of their target APIs, not just those with confirmed user input flow. This is intentional for code review triage: the rules surface locations for human review rather than claiming every match is exploitable.
+**Receiver name matching:** `dotnet-xss-html-raw` matches the receiver by name (`Html`, `html`, `htmlHelper`, `helper`, case-insensitive), not by type. An `IHtmlHelper` parameter with any other name, such as `h`, is not matched. Calls with a string literal argument, such as `Html.Raw("<hr/>")`, are not flagged.
+
+**Broad matching:** `dotnet-path-traversal-combine` flags every use of `Path.Combine`, including ones that validate the resulting path afterwards, because Semgrep cannot see validation that happens after the call. This is intentional for code review triage: the rule surfaces locations for human review rather than claiming every match is exploitable.
+
+**Command injection scope:** `dotnet-cmdi-process-start` skips `Process.Start` calls and `FileName` / `Arguments` assignments whose values are string literals, including variables that are only ever assigned literals. Any other value is flagged, whether or not it actually comes from user input.
+
+## Testing
+
+Each rule has a paired fixture in `tests/vulnerable/` (code it must flag) and `tests/safe/` (the closest safe equivalent). The fixtures carry `// ruleid:` and `// ok:` comments that document the expected result for each case.
+
+To run the same checks as CI locally:
+
+```bash
+semgrep --config rules/ tests/vulnerable/ --json -o vulnerable-results.json
+semgrep --config rules/ tests/safe/ --json -o safe-results.json
+python tests/check_fixtures.py vulnerable-results.json safe-results.json
+```
+
+`tests/check_fixtures.py` fails if any rule in `rules/` produces no finding on the vulnerable fixtures, or if any rule outside the `KNOWN_BROAD` set produces a finding on the safe fixtures. `KNOWN_BROAD` currently contains only `dotnet-path-traversal-combine` (see Known Limitations). The check is per rule, not per line: it does not verify that findings land on the lines annotated `ruleid:`.
+
+The workflow in `.github/workflows/validate-rules.yml` runs these steps on every push and pull request to `main`, with Semgrep pinned to a fixed version so results do not change between runs.
