@@ -1,10 +1,16 @@
 rules:
   - id: dotnet-xss-html-raw
-    pattern: Html.Raw(...)
+    patterns:
+      - pattern: $H.Raw(...)
+      - metavariable-regex:
+          metavariable: $H
+          regex: (?i)^(html|htmlhelper|helper)$
+      - pattern-not: $H.Raw("...")
     message: >
       Html.Raw() bypasses Razor auto-encoding and renders input as raw HTML.
       If the value comes from user input, this is XSS. Remove Html.Raw()
-      and let Razor encode the output.
+      and let Razor encode the output. Matches the receiver by name
+      (Html, html, htmlHelper, helper), not by type.
     severity: ERROR
     languages: [csharp]
     metadata:
